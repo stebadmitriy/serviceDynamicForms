@@ -3,7 +3,6 @@ package com.example.serviceDynamicForms.controllers;
 
 import com.example.serviceDynamicForms.model.form.meta.MetaFields;
 import com.example.serviceDynamicForms.model.form.meta.MetaForm;
-import com.example.serviceDynamicForms.model.form.meta.MetaValues;
 import com.example.serviceDynamicForms.model.form.values.Form;
 import com.example.serviceDynamicForms.model.result.Result;
 import com.example.serviceDynamicForms.service.FormService;
@@ -29,7 +28,7 @@ public class FormController {
     private final static String RESULT_ERROR = "ошибка";
     private final static String TYPE_LIST = "list";
     private final static String META_FORM_LIST = "metaFormList";
-
+ 
     @RequestMapping(value = "/create", method = POST)
     public Result createValuesForm(@RequestBody @NonNull Form form, HttpSession session) {
 
@@ -66,16 +65,11 @@ public class FormController {
     private boolean checkValueType(List<MetaForm> metaForms, List<String> formValues) {
         boolean isValid = true;
         List<MetaFields> metaFields = metaForms.get(0).getFields();
-        for (MetaFields meta : metaFields) {
-            if (meta.getType().equalsIgnoreCase(TYPE_LIST)) {
-                MetaValues metaValue = meta.getValues();
-                for (String formValue : formValues) {
-                    if (!formValue.equalsIgnoreCase(metaValue.getNone()) &&
-                            !formValue.equalsIgnoreCase(metaValue.getV1()) &&
-                            !formValue.equalsIgnoreCase(metaValue.getV2()) &&
-                            !formValue.equalsIgnoreCase(metaValue.getV3())) {
-                        isValid = false;
-                    }
+        for (int i = 0; i < metaFields.size(); i++) {
+            if (metaFields.get(i).getType().equalsIgnoreCase(TYPE_LIST)) {
+                List<String> values = new ArrayList<>(metaFields.get(i).getValues().values());
+                if (!values.contains(formValues.get(i))) {
+                    isValid = false;
                 }
             }
         }
