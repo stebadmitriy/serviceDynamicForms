@@ -18,6 +18,7 @@ public class MetaController {
     private MetaService metaService;
     private final static String META_FORM_LIST = "metaFormList";
 
+
     @RequestMapping(value = "/getAll", method = GET)
     public List<MetaForm> getAllMetaForm(HttpSession session) {
         List<MetaForm> metaForms = metaService.findAll();

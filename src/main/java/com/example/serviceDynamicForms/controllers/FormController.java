@@ -1,6 +1,5 @@
 package com.example.serviceDynamicForms.controllers;
 
-
 import com.example.serviceDynamicForms.model.form.meta.MetaFields;
 import com.example.serviceDynamicForms.model.form.meta.MetaForm;
 import com.example.serviceDynamicForms.model.form.values.Form;
@@ -8,11 +7,14 @@ import com.example.serviceDynamicForms.model.result.Result;
 import com.example.serviceDynamicForms.service.FormService;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,14 +30,13 @@ public class FormController {
     private final static String RESULT_ERROR = "ошибка";
     private final static String TYPE_LIST = "list";
     private final static String META_FORM_LIST = "metaFormList";
- 
-    @RequestMapping(value = "/create", method = POST)
-    public Result createValuesForm(@RequestBody @NonNull Form form, HttpSession session) {
 
+    @RequestMapping(value = "/create", method = POST)
+    public Result createValuesForm(@RequestBody @NonNull Form form, HttpSession session, HttpServletResponse response) throws IOException {
+        Result result = new Result();
         List<MetaForm> metaForms = (List<MetaForm>) session.getAttribute(META_FORM_LIST);
         List<String> formKeys = new ArrayList<>(form.getForm().keySet());
         List<String> formValues = new ArrayList<>(form.getForm().values());
-        Result result = new Result();
 
         if (checkName(metaForms, formKeys) && checkValueType(metaForms, formValues)) {
             result.setResult(RESULT_SUCCESSFUL);
@@ -45,6 +46,14 @@ public class FormController {
         }
         return result;
 
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public Result handleNPException(HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_REQUEST_TIMEOUT);
+        Result result = new Result();
+        result.setResult(RESULT_ERROR);
+        return result;
     }
 
     private boolean checkName(List<MetaForm> metaForms, List<String> formKeys) {
